@@ -1,0 +1,458 @@
+```
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alphabet Inc. Financial Dashboard</title>
+    <style>
+        :root {
+            --google-blue: #4285F4;
+            --google-red: #DB4437;
+            --google-yellow: #F4B400;
+            --google-green: #0F9D58;
+            --bg-body: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-light: #dadce0;
+            --trend-line-color: #5f6368;
+        }
+
+        body {
+            font-family: 'Google Sans', Roboto, Arial, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .brand-bar {
+            display: flex;
+            height: 6px;
+            width: 100%;
+        }
+        .brand-bar div { flex: 1; }
+        .bar-blue { background-color: var(--google-blue); }
+        .bar-red { background-color: var(--google-red); }
+        .bar-yellow { background-color: var(--google-yellow); }
+        .bar-green { background-color: var(--google-green); }
+
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 30px 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(60,64,67,0.05);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        h1 { font-size: 28px; font-weight: 400; margin: 0; color: var(--text-primary); display: flex; align-items: baseline;}
+        .student-id { font-size: 16px; color: var(--text-secondary); font-weight: normal; margin-left: 15px; }
+        .subtitle { color: var(--text-secondary); font-size: 14px; margin-top: 8px; }
+        .header-logo { font-size: 24px; font-weight: bold; color: var(--text-secondary); letter-spacing: -1px; }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            margin: 40px 0 20px 0;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-light);
+        }
+        .section-title { font-size: 20px; color: var(--text-primary); font-weight: 500; }
+        .section-tag {
+            background-color: #e8f0fe;
+            color: var(--google-blue);
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 15px;
+            text-transform: uppercase;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid rgba(0,0,0,0.05);
+            box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover { transform: translateY(-4px); box-shadow: 0 6px 12px rgba(60,64,67,0.15); }
+        .card::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 4px; }
+        .card.accent-blue::before { background-color: var(--google-blue); }
+        .card.accent-red::before { background-color: var(--google-red); }
+        .card.accent-yellow::before { background-color: var(--google-yellow); }
+        .card.accent-green::before { background-color: var(--google-green); }
+
+        .metric-label { font-size: 13px; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; margin-bottom: 12px; }
+        .metric-value { font-size: 36px; font-weight: 400; color: var(--text-primary); margin-bottom: 8px; }
+        .metric-change { display: inline-flex; align-items: center; font-size: 14px; font-weight: 500; padding: 4px 8px; border-radius: 4px; background-color: rgba(60,64,67,0.05); }
+        .trend-up { color: var(--google-green); background-color: #e6f4ea; }
+        .trend-down { color: var(--google-red); background-color: #fce8e6; }
+        .metric-context { color: var(--text-secondary); font-size: 13px; margin-left: 8px; }
+        .analysis-text { margin-top: 20px; padding-top: 15px; border-top: 1px solid #f1f3f4; font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+        /* Outlook Panel Styles */
+        .outlook-panel {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(60,64,67,0.08);
+            border-left: 6px solid var(--google-yellow);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .outlook-item {
+            display: flex;
+            align-items: flex-start;
+        }
+        
+        .outlook-icon {
+            background-color: #fef7e0;
+            color: var(--google-yellow);
+            min-width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 15px;
+            margin-top: 2px;
+        }
+
+        .outlook-content h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .outlook-content p {
+            margin: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        /* Chart Styles */
+        .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 40px; }
+        @media (max-width: 768px) { .chart-grid { grid-template-columns: 1fr; .outlook-panel { grid-template-columns: 1fr; } } }
+
+        .chart-container {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 1px 3px rgba(60,64,67,0.1);
+            border: 1px solid rgba(0,0,0,0.05);
+            position: relative;
+        }
+
+        .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
+        .chart-title { font-size: 16px; font-weight: 500; color: var(--text-primary); }
+        .chart-legend { display: flex; align-items: center; font-size: 11px; color: var(--text-secondary); }
+        .legend-item { display: flex; align-items: center; margin-left: 15px; }
+        .legend-dot { width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+        .legend-line { width: 15px; height: 2px; background-color: var(--text-secondary); margin-right: 5px; stroke-dasharray: 4; }
+
+        .chart-wrapper {
+            height: 250px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-top: 20px;
+            position: relative;
+        }
+
+        .chart-bg-lines {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 0;
+            display: flex; flex-direction: column; justify-content: space-between;
+        }
+        .chart-line { width: 100%; border-top: 1px dashed #e8eaed; height: 0; }
+
+        .bar-group {
+            display: flex; flex-direction: column; align-items: center; width: 18%; z-index: 1; position: relative;
+        }
+        .bar {
+            width: 100%; background-color: #aecbfa; border-radius: 4px 4px 0 0; position: relative;
+            transition: height 1s ease-out;
+        }
+        .bar.highlight { background-color: var(--google-blue); box-shadow: 0 4px 10px rgba(66, 133, 244, 0.3); }
+        .bar.highlight-income { background-color: var(--google-green); box-shadow: 0 4px 10px rgba(15, 157, 88, 0.3); }
+        .bar-income { background-color: #a8dab5; }
+
+        .bar-value {
+            position: absolute; top: -25px; left: 50%; transform: translateX(-50%);
+            font-size: 12px; font-weight: 600; color: var(--text-secondary); white-space: nowrap;
+        }
+        .bar-label { margin-top: 10px; font-size: 12px; color: var(--text-secondary); font-weight: 500; }
+
+        .q4-tag {
+            position: absolute; top: -45px; background-color: var(--text-primary); color: #fff;
+            font-size: 10px; padding: 2px 6px; border-radius: 4px; left: 50%; transform: translateX(-50%); white-space: nowrap;
+        }
+        .q4-tag::after {
+            content: ''; position: absolute; bottom: -4px; left: 50%; transform: translateX(-50%);
+            border-left: 4px solid transparent; border-right: 4px solid transparent; border-top: 4px solid var(--text-primary);
+        }
+
+        .trend-overlay {
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 2;
+        }
+        .trend-path {
+            fill: none; stroke: var(--text-secondary); stroke-width: 2; stroke-dasharray: 5,5; opacity: 0.7;
+        }
+
+        .footer { margin-top: 60px; margin-bottom: 40px; text-align: center; font-size: 12px; color: #9aa0a6; }
+    </style>
+</head>
+<body>
+
+<div class="brand-bar">
+    <div class="bar-blue"></div>
+    <div class="bar-red"></div>
+    <div class="bar-yellow"></div>
+    <div class="bar-green"></div>
+</div>
+
+<div class="container">
+    <header>
+        <div>
+            <h1>Investor Dashboard <span class="student-id">Student ID: 24165921</span></h1>
+            <div class="subtitle">Alphabet Inc. | Fiscal Year 2025 & Q4 Financial Highlights</div>
+        </div>
+        <div class="header-logo">Alphabet</div>
+    </header>
+
+    <!-- Metrics Section -->
+    <div class="section-header">
+        <div class="section-title">Quarterly Momentum</div>
+        <div class="section-tag">Q4 2025 vs Q3 2025</div>
+    </div>
+
+    <div class="metrics-grid">
+        <div class="card accent-blue">
+            <div class="metric-label">Total Revenue</div>
+            <div class="metric-value">$113.83 B</div>
+            <div class="metric-change trend-up">▲ 11.2%</div>
+            <span class="metric-context">vs Q3 ($102.35 B)</span>
+            <div class="analysis-text">Strong sequential acceleration driven by Google Cloud (+48% YoY) and Search (+17% YoY).</div>
+        </div>
+        <div class="card accent-green">
+            <div class="metric-label">Operating Income</div>
+            <div class="metric-value">$35.93 B</div>
+            <div class="metric-change trend-up">▲ 15.1%</div>
+            <span class="metric-context">vs Q3 ($31.23 B)</span>
+            <div class="analysis-text">Operating margin remained solid at ~31.6% despite a $2.1B charge related to Waymo.</div>
+        </div>
+        <div class="card accent-yellow">
+            <div class="metric-label">Net Income</div>
+            <div class="metric-value">$34.46 B</div>
+            <div class="metric-change trend-down">▼ 1.5%</div>
+            <span class="metric-context">vs Q3 ($34.98 B)</span>
+            <div class="analysis-text">Slight sequential decrease; Q3 benefited from higher Other Income & Expense (OI&E) gains.</div>
+        </div>
+        <div class="card accent-red">
+            <div class="metric-label">Diluted EPS</div>
+            <div class="metric-value">$2.82</div>
+            <div class="metric-change trend-down">▼ 1.7%</div>
+            <span class="metric-context">vs Q3 ($2.87)</span>
+            <div class="analysis-text">EPS remains robust year-over-year (+31%), though slightly down sequentially from Q3.</div>
+        </div>
+    </div>
+
+    <!-- Strategic Outlook Panel -->
+    <div class="section-header">
+        <div class="section-title">Strategic Outlook: Key Developments</div>
+        <div class="section-tag">Last 90 Days</div>
+    </div>
+
+    <div class="outlook-panel">
+        <div class="outlook-item">
+            <div class="outlook-icon">1</div>
+            <div class="outlook-content">
+                <h3>Massive AI Infrastructure Investment</h3>
+                <p>Capital expenditures surged to $27.9B in Q4 (up 95% YoY) to support Generative AI. Management signals continued elevated spend into 2026 to build technical capacity.</p>
+            </div>
+        </div>
+        <div class="outlook-item">
+            <div class="outlook-icon">2</div>
+            <div class="outlook-content">
+                <h3>Regulatory & Antitrust Challenges</h3>
+                <p>Significant legal headwinds identified with fines (e.g. $3.5B EC fine) and ongoing antitrust proceedings, posing potential risks to business models.</p>
+            </div>
+        </div>
+        <div class="outlook-item">
+            <div class="outlook-icon">3</div>
+            <div class="outlook-content">
+                <h3>Cloud & AI Revenue Acceleration</h3>
+                <p>Google Cloud revenue grew 48% YoY in Q4 to $17.7B, reaching a $70B annualized run-rate, validating the strategy to integrate advanced AI models into enterprise offerings.</p>
+            </div>
+        </div>
+        <div class="outlook-item">
+            <div class="outlook-icon">4</div>
+            <div class="outlook-content">
+                <h3>Autonomous Driving Expansion</h3>
+                <p>Waymo secured a new $16.0 billion investment round in Feb 2026 (majority funded by Alphabet), signaling a major commitment to scaling autonomous ride-hailing.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="section-header">
+        <div class="section-title">2025 Quarterly Trailing Performance</div>
+        <div class="section-tag">Fiscal Year Trend</div>
+    </div>
+
+    <div class="chart-grid">
+        <!-- Revenue Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">Total Revenue (Billions USD)</div>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background-color: var(--google-blue);"></div>Actuals</div>
+                    <div class="legend-item"><div class="legend-line"></div>Linear Trend</div>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <div class="chart-bg-lines">
+                    <div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div>
+                </div>
+                <!-- Bars -->
+                <div class="bar-group">
+                    <div class="bar" style="height: 63%;"></div>
+                    <div class="bar-value">$90.2</div>
+                    <div class="bar-label">Q1</div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar" style="height: 68%;"></div>
+                    <div class="bar-value">$96.4</div>
+                    <div class="bar-label">Q2</div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar" style="height: 72%;"></div>
+                    <div class="bar-value">$102.3</div>
+                    <div class="bar-label">Q3</div>
+                </div>
+                <div class="bar-group">
+                    <div class="q4-tag">Record</div>
+                    <div class="bar highlight" style="height: 80%;"></div>
+                    <div class="bar-value" style="font-weight: 700; color: var(--google-blue);">$113.8</div>
+                    <div class="bar-label" style="font-weight: 700;">Q4</div>
+                </div>
+                <!-- Trend Line -->
+                <svg class="trend-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line class="trend-path" x1="12" y1="37" x2="88" y2="21" />
+                </svg>
+            </div>
+        </div>
+
+        <!-- Net Income Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <div class="chart-title">Net Income (Billions USD)</div>
+                <div class="chart-legend">
+                    <div class="legend-item"><div class="legend-dot" style="background-color: var(--google-green);"></div>Actuals</div>
+                    <div class="legend-item"><div class="legend-line"></div>Linear Trend</div>
+                </div>
+            </div>
+            <div class="chart-wrapper">
+                <div class="chart-bg-lines">
+                    <div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div><div class="chart-line"></div>
+                </div>
+                <!-- Bars -->
+                <div class="bar-group">
+                    <div class="bar bar-income" style="height: 77%;"></div>
+                    <div class="bar-value">$34.5</div>
+                    <div class="bar-label">Q1</div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar bar-income" style="height: 63%;"></div>
+                    <div class="bar-value">$28.2</div>
+                    <div class="bar-label">Q2</div>
+                </div>
+                <div class="bar-group">
+                    <div class="bar bar-income" style="height: 78%;"></div>
+                    <div class="bar-value">$35.0</div>
+                    <div class="bar-label">Q3</div>
+                </div>
+                <div class="bar-group">
+                    <div class="q4-tag">Strong</div>
+                    <div class="bar highlight-income" style="height: 77%;"></div>
+                    <div class="bar-value" style="font-weight: 700; color: var(--google-green);">$34.5</div>
+                    <div class="bar-label" style="font-weight: 700;">Q4</div>
+                </div>
+                <!-- Trend Line -->
+                <svg class="trend-overlay" viewBox="0 0 100 100" preserveAspectRatio="none">
+                    <line class="trend-path" x1="12" y1="28.7" x2="88" y2="24" />
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <!-- Annual Context -->
+    <div class="section-header">
+        <div class="section-title">Annual Performance Context</div>
+        <div class="section-tag">FY 2024 vs FY 2023</div>
+    </div>
+    <div class="metrics-grid">
+        <div class="card accent-blue">
+            <div class="metric-label">Annual Revenue</div>
+            <div class="metric-value">$350.02 B</div>
+            <div class="metric-change trend-up">▲ 13.9%</div>
+            <span class="metric-context">vs FY '23 ($307.39 B)</span>
+            <div class="analysis-text">Foundational growth year setting the stage for the $400B milestone achieved in 2025.</div>
+        </div>
+        <div class="card accent-green">
+            <div class="metric-label">Annual Op. Income</div>
+            <div class="metric-value">$112.39 B</div>
+            <div class="metric-change trend-up">▲ 33.3%</div>
+            <span class="metric-context">vs FY '23 ($84.29 B)</span>
+            <div class="analysis-text">Significant margin expansion in 2024 driven by cost discipline and revenue scale.</div>
+        </div>
+        <div class="card accent-yellow">
+            <div class="metric-label">Annual Net Income</div>
+            <div class="metric-value">$100.12 B</div>
+            <div class="metric-change trend-up">▲ 35.7%</div>
+            <span class="metric-context">vs FY '23 ($73.80 B)</span>
+            <div class="analysis-text">First year surpassing $100B in Net Income, reflecting high operational efficiency.</div>
+        </div>
+        <div class="card accent-red">
+            <div class="metric-label">Annual Diluted EPS</div>
+            <div class="metric-value">$8.04</div>
+            <div class="metric-change trend-up">▲ 38.6%</div>
+            <span class="metric-context">vs FY '23 ($5.80)</span>
+            <div class="analysis-text">Robust EPS growth aided by significant share repurchases during the fiscal year.</div>
+        </div>
+    </div>
+
+    <div class="footer">
+        Data Sources: Alphabet Inc. Form 10-K (2025), Form 10-Q (Q1, Q2, Q3 2025), Earnings Release (Q4 2025).<br>
+        All figures presented in Billions of USD. Trend lines represent linear regression of 2025 quarterly data.
+    </div>
+</div>
+
+</body>
+</html>
+```
